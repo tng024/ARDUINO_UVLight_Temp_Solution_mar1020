@@ -1,7 +1,4 @@
-void setup() {
-  // put your setup code here, to run once:
-
-}#include <ESP8266WiFi.h>        //I can connect to a Wifi
+#include <ESP8266WiFi.h>        //I can connect to a Wifi
 #include <ESP8266WebServer.h>   //I can be a server 'cos I have the class ESP8266WebServer available
 #include <WiFiClient.h>
 
@@ -16,23 +13,24 @@ Relay relay(12);
 PIR PIR_sensor(1,3,15,13,12,14);
 
 
-
+// Variable declaration
 const int dirPin = 5; //This pin corresponds to GPIO5 (D1) (Yellow wire) https://nodemcu.readthedocs.io/en/latest/en/modules/gpio/
 const int stepPin = 4; //This pin corresponds to GPIO4 (D2) (Orange wire)
 int steps = 0; //This variable is related to the number of turns. If microstepping is disabled, 200 corresponds to a complete turn.
 int stepDelay = 0; //This variable is the pulse duration in milliseconds and it is related to the rotation speed. Without microstepping, 1.8º are stepDelay ms.
 bool dir = HIGH; //Rotation direction. HIGH is clockwise.
 
+String relayCmd;
+unsigned long timerDuration;
+
 
 void setup() {
-  pinMode(dirPin, OUTPUT);  // Pins are outputs
-  pinMode(stepPin, OUTPUT);
-
+  // Instantiate objects
   PIR_sensor.configuration();
   PIR_sensor.pirCheck();
 
-  delay(1000);
-  Serial.begin(115200);           //I can debbug through the serial port
+  // Start serial comm. - Debug tool
+  Serial.begin(115200);           
 
   // Configure NODEMCU as Access Point
   Serial.print("Configuring access point...");
@@ -41,16 +39,15 @@ void setup() {
   Serial.print("AP IP address: "); //This is written in the PC console.
   Serial.println(myIP);
 
+  // Handler association
   server.on("/", handleRootPath); 
+  server.on("/Init", handleInit);   
+  server.on("/RelayControl", handleRelayControl);     
+  server.on("/Timer", handleTimer);   
 
-  server.on("/Init", handleInit);   //Associate the handler function to the path "/Init".
-
-  server.on("/RelayControl", handleRelayControl);   //Associate the handler function to the path "/RelayControl".  
-  
-  server.on("/Timer", handleTimer);   //Associate the handler function to the path "/Timer".  
-  
-  server.begin();                 //Let's call the begin method on the server object to start the server.
-  Serial.println("HTTP server started");
+  // Start server
+  server.begin();                 
+  Serial.println("Server started!");
 }
 
 void loop() {
@@ -103,8 +100,10 @@ void handleInit() {
 void handleRelayControl(){
     String message = "Initialization with: ";
     if (server.hasArg("State")) {
-    String temp = server.arg("State");
-    Serial.println(temp);
+    relayCmd = server.arg("State");
+    Serial.println(relayCmd);
+    //String temp = server.arg("State");
+    //Serial.println(temp);
     message += "State: ";
     message += server.arg("State");
   }
@@ -128,8 +127,3 @@ void handleTimer(){
   }
   server.send(200, "text/plain", message); 
   }
-
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}

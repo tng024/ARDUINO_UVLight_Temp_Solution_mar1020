@@ -9,8 +9,10 @@ const char *ssid = "ESPap";
 const char *password = "yourpassword"; 
 ESP8266WebServer server(80);    
 
+// Instantiate objects
 Relay relay(12);
 PIR pirSensor(1,3,15,13,12,14);
+millisDelay timer;
 
 
 // Variable declaration
@@ -27,9 +29,12 @@ int timerCancelCmd;
 
 
 void setup() {
-  // Instantiate objects
+  // PIR sensors
   pirSensor.configuration();
   pirSensor.pirCheck();
+
+  // Relay
+  relay.initialize();
 
   // Start serial comm. - Debug tool
   Serial.begin(115200);           

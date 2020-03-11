@@ -1,5 +1,5 @@
-#include <ESP8266WiFi.h>        //I can connect to a Wifi
-#include <ESP8266WebServer.h>   //I can be a server 'cos I have the class ESP8266WebServer available
+#include <ESP8266WiFi.h>        
+#include <ESP8266WebServer.h>   
 #include <WiFiClient.h>
 
 #include "Relay.hpp"
@@ -10,7 +10,7 @@ const char *password = "yourpassword";
 ESP8266WebServer server(80);    
 
 Relay relay(12);
-PIR PIR_sensor(1,3,15,13,12,14);
+PIR pirSensor(1,3,15,13,12,14);
 
 
 // Variable declaration
@@ -20,14 +20,16 @@ int steps = 0; //This variable is related to the number of turns. If microsteppi
 int stepDelay = 0; //This variable is the pulse duration in milliseconds and it is related to the rotation speed. Without microstepping, 1.8º are stepDelay ms.
 bool dir = HIGH; //Rotation direction. HIGH is clockwise.
 
-String relayCmd;
-unsigned long timerDuration;
+String relayControlCmd;
+unsigned long timerDurationCmd;
+int timerCancelCmd;
+
 
 
 void setup() {
   // Instantiate objects
-  PIR_sensor.configuration();
-  PIR_sensor.pirCheck();
+  pirSensor.configuration();
+  pirSensor.pirCheck();
 
   // Start serial comm. - Debug tool
   Serial.begin(115200);           
@@ -52,13 +54,17 @@ void setup() {
 
 void loop() {
   server.handleClient();          //To handle the actual incoming of HTTP requests, we need to call the handleClient method on the server object, on the main loop function.
-//  if(PIR_sensor.pirCheck()){
+  Serial.println(relayControlCmd);
+  Serial.println(timerDurationCmd);
+  Serial.println(timerCancelCmd);
+  delay(200);
+//  if(pirSensor.pirCheck()){
 //    Serial.println("Human detected! Shutting down...");
 //    }
 //  else{
 //    Serial.println("No human detected!");
 //    }
-    //if(PIR_sensor.pirCheck())
+    //if(pirSensor.pirCheck())
 }
 
 void handleRootPath() {
@@ -100,8 +106,8 @@ void handleInit() {
 void handleRelayControl(){
     String message = "Initialization with: ";
     if (server.hasArg("State")) {
-    relayCmd = server.arg("State");
-    Serial.println(relayCmd);
+    relayControlCmd = server.arg("State");
+    //Serial.println(relayCmd);
     //String temp = server.arg("State");
     //Serial.println(temp);
     message += "State: ";
@@ -113,15 +119,15 @@ void handleRelayControl(){
 void handleTimer(){
     String message = "Initialization with: ";
     if (server.hasArg("Duration")) {
-    String temp = server.arg("Duration");
-    Serial.println(temp);
+    timerDurationCmd = (server.arg("Duration").toInt());
+    //Serial.println(temp);
     message += "Duration: ";
     message += server.arg("Duration");
   }
 
     if (server.hasArg("Cancel")) {
-    String temp = server.arg("Cancel");
-    Serial.println(temp);
+    timerCancelCmd = (server.arg("Cancel").toInt());
+    //Serial.println(temp);
     message += "Cancel: ";
     message += server.arg("Cancel");
   }

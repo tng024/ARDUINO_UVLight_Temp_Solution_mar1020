@@ -72,7 +72,13 @@ class millisDelay {
     /**
       The delay set in start
     */
+    
     unsigned long delay();
+
+    /**
+     Convert millisec to minute 
+     */
+    unsigned long toMillisec(int min_val);
 
   private:
     unsigned long mS_delay;

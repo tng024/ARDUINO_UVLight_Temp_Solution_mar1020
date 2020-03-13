@@ -115,3 +115,10 @@ unsigned long millisDelay::remaining() {
 unsigned long millisDelay::delay() {
   return mS_delay;
 }
+
+/**
+  Convert minute to millisec
+*/
+unsigned long millisDelay::toMillisec(int min_val) {
+  return min_val*60*1000;
+}

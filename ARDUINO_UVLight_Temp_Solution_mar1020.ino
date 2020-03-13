@@ -4,8 +4,9 @@
 
 #include "Relay.hpp"
 #include "PIR.hpp"
+#include "millisDelay.h"
 
-const char *ssid = "ESPap";  
+const char *ssid = "UVLightDevice";  
 const char *password = "yourpassword"; 
 ESP8266WebServer server(80);    
 
@@ -16,12 +17,6 @@ millisDelay timer;
 
 
 // Variable declaration
-const int dirPin = 5; //This pin corresponds to GPIO5 (D1) (Yellow wire) https://nodemcu.readthedocs.io/en/latest/en/modules/gpio/
-const int stepPin = 4; //This pin corresponds to GPIO4 (D2) (Orange wire)
-int steps = 0; //This variable is related to the number of turns. If microstepping is disabled, 200 corresponds to a complete turn.
-int stepDelay = 0; //This variable is the pulse duration in milliseconds and it is related to the rotation speed. Without microstepping, 1.8º are stepDelay ms.
-bool dir = HIGH; //Rotation direction. HIGH is clockwise.
-
 String relayControlCmd;
 unsigned long timerDurationCmd;
 int timerCancelCmd;
@@ -55,6 +50,10 @@ void setup() {
   // Start server
   server.begin();                 
   Serial.println("Server started!");
+
+  // Test timer lib
+  Serial.println(timer.toMillisec(2));
+  delay(3000);
 }
 
 void loop() {
@@ -63,13 +62,24 @@ void loop() {
   Serial.println(timerDurationCmd);
   Serial.println(timerCancelCmd);
   delay(200);
+  if(relayControlCmd == "ON"){
+    relay.ON();
+    Serial.println("Relay is ON");  
+    delay(1000);
+    }
+  else{
+    relay.OFF();
+    Serial.println("Relay is OFF");  
+    delay(1000);
+    }
+    
 //  if(pirSensor.pirCheck()){
 //    Serial.println("Human detected! Shutting down...");
 //    }
 //  else{
 //    Serial.println("No human detected!");
 //    }
-    //if(pirSensor.pirCheck())
+//  if(pirSensor.pirCheck())
 }
 
 void handleRootPath() {
@@ -77,35 +87,7 @@ void handleRootPath() {
 }
 
 void handleInit() {
-  steps = 0;  //Motor stopped if the arguments are wrong.
-  stepDelay = 0;
-  String message = "Initialization with: ";
 
-  if (server.hasArg("Dir")) {
-    digitalWrite(dirPin, server.arg("Dir") == "HIGH"); //This is a cunning way of checking the value of the argument Dir.
-    message += "Direction: ";
-    message += server.arg("Dir");
-  }
-  if (server.hasArg("Delay")) {
-    stepDelay = (server.arg("Delay")).toInt(); //Converts the string to integer.
-    message += " Delay: ";
-    message += server.arg("Delay");
-  }
-  if (server.hasArg("Steps")) {
-    steps = (server.arg("Steps")).toInt();
-    message += " Steps: ";
-    message += server.arg("Steps");
-  }
-
-  server.send(200, "text/plain", message); 
-  
-  for (int i = 0; i < steps; i++) { 
-    digitalWrite(stepPin, HIGH);
-    delay(stepDelay);
-    digitalWrite(stepPin, LOW);
-    delay(stepDelay);
-  }
-  Serial.println(steps); 
 }
 
 void handleRelayControl(){

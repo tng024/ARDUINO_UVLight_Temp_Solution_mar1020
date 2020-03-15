@@ -11,15 +11,17 @@ const char *password = "yourpassword";
 ESP8266WebServer server(80);    
 
 // Instantiate objects
-Relay relay(12);
-PIR pirSensor(1,3,15,13,12,14);
+Relay relay(4);
+PIR pirSensor(5,3,15,13,12,14);
 millisDelay timer;
+millisDelay timer2;
 
 
 // Variable declaration
 String relayControlCmd;
 unsigned long timerDurationCmd;
 int timerCancelCmd;
+bool waitTimeFinished;
 
 
 
@@ -54,6 +56,10 @@ void setup() {
   // Test timer lib
   Serial.println(timer.toMillisec(2));
   delay(3000);
+
+  relay.ON();
+  delay(2000);
+  relay.OFF();
 }
 
 void loop() {
@@ -63,9 +69,17 @@ void loop() {
   Serial.println(timerCancelCmd);
   delay(200);
   if(relayControlCmd == "ON"){
-    relay.ON();
-    Serial.println("Relay is ON");  
-    delay(1000);
+    timer2.start(1); // Delay 1 second (to test)
+    if(timer2.justFinished()){
+      Serial.println("Safe to turn on!");
+      timer.start(timerDurationCmd);  // Start timer of timerDuration
+      relay.ON();
+      Serial.println("Relay is ON");  
+      if(timer.justFinished()){
+        relay.OFF();
+        Serial.println("Relay is OFF");        
+        }
+      }
     }
   else{
     relay.OFF();

@@ -45,9 +45,8 @@ void setup() {
 
   // Handler association
   server.on("/", handleRootPath); 
-  server.on("/Init", handleInit);   
-  server.on("/RelayControl", handleRelayControl);     
-  server.on("/Timer", handleTimer);   
+  server.on("/Init", handleInit);     
+  server.on("/controlCmd", handleControlCmd);   
 
   // Start server
   server.begin();                 
@@ -114,19 +113,6 @@ void handleRootPath() {
 void handleInit() {
 
 }
-
-void handleRelayControl(){
-    String message = "Initialization with: ";
-    if (server.hasArg("State")) {
-    relayControlCmd = server.arg("State");
-    //Serial.println(relayCmd);
-    //String temp = server.arg("State");
-    //Serial.println(temp);
-    message += "State: ";
-    message += server.arg("State");
-  }
-  server.send(200, "text/plain", message); 
-  }
 
 void handleTimer(){
     String message = "Initialization with: ";

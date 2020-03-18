@@ -114,7 +114,7 @@ void handleInit() {
 
 }
 
-void handleTimer(){
+void handleControlCmd(){
     String message = "Initialization with: ";
     if (server.hasArg("Duration")) {
     timerDurationCmd = (server.arg("Duration").toInt());

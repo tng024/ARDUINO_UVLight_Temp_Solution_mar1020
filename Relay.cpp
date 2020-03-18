@@ -24,4 +24,8 @@ void Relay::ON(){
 void Relay::OFF(){
   digitalWrite(_pin, LOW);
   }
+
+void Relay::stateSwitch(bool state){
+  digitalWrite(_pin, (state?HIGH:LOW));
+  }
   

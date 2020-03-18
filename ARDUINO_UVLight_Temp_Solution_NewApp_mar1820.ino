@@ -21,7 +21,7 @@ millisDelay timer2;
 String relayControlCmd;
 unsigned long timerDurationCmd;
 int timerCancelCmd;
-bool waitTimeFinished;
+bool waitTimeFinished, relayState, preRelayState;
 
 
 
@@ -67,25 +67,34 @@ void loop() {
   Serial.println(relayControlCmd);
   Serial.println(timerDurationCmd);
   Serial.println(timerCancelCmd);
-  delay(200);
+  //delay(200);
+  
   if(relayControlCmd == "ON"){
     timer2.start(1); // Delay 1 second (to test)
     if(timer2.justFinished()){
       Serial.println("Safe to turn on!");
       timer.start(timerDurationCmd);  // Start timer of timerDuration
-      relay.ON();
+      //relay.ON();
+      relayState = 1;
       Serial.println("Relay is ON");  
       if(timer.justFinished()){
-        relay.OFF();
+        //relay.OFF();
+        relayState = 0;
         Serial.println("Relay is OFF");        
         }
       }
     }
   else{
-    relay.OFF();
+    relayState = 0;
     Serial.println("Relay is OFF");  
     delay(1000);
     }
+
+  if(relayState!=preRelayState){
+    Serial.println("Relay State: ");
+    Serial.println(relayState);
+    relay.stateSwitch(relayState);
+  }
     
 //  if(pirSensor.pirCheck()){
 //    Serial.println("Human detected! Shutting down...");
@@ -94,6 +103,8 @@ void loop() {
 //    Serial.println("No human detected!");
 //    }
 //  if(pirSensor.pirCheck())
+
+    preRelayState = relayState;
 }
 
 void handleRootPath() {
